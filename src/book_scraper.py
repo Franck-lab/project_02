@@ -32,5 +32,4 @@ with open(filePath, 'w+') as csvFile:
   writer = csv.writer(csvFile)
   writer.writerow(headers)
   writer.writerow(items)
-# for key, value in productData.items():
-#   print(f'{key}:\t{value}')
+
