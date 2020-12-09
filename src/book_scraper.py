@@ -2,8 +2,6 @@ import requests
 import csv
 from bs4 import BeautifulSoup
 
-website = 'http://books.toscrape.com/'
-productUrls = []
 
 def crawlPages(url):
   try:
@@ -14,34 +12,34 @@ def crawlPages(url):
   bs = BeautifulSoup(r.content, 'html.parser')
   return bs
 
-def getCategoryLinks():
+
+def getCategoryLinks(homePageBS):
   categoryLinks = []
-  for category in bs.select('ul.nav-list ul li a'):
+  for category in homePageBS.select('ul.nav-list ul li a'):
     categoryLinks.append(category['href'])
   return categoryLinks
 
-def browseCategories(baseUrl, pageLink):
-  bs = crawlPages(f'{baseUrl}{pageLink}')
-  getProductUrls(bs)
+
+def browseCategories(baseUrl, pageLink, productUrls):
+  categoryBS = crawlPages(f'{baseUrl}{pageLink}')
+  productUrls.extend(getProductUrls(categoryBS))
   try:
-    nextPage = bs.find('li', class_='next').a['href']
+    nextPage = categoryBS.find('li', class_='next').a['href']
   except AttributeError:
     pass
   else:
-    browseCategories(baseUrl, nextPage)
+    productUrls = browseCategories(baseUrl, nextPage, productUrls)
+  return productUrls
 
-def getProductUrls(bs):
-  products = bs.find_all('article', class_='product_pod')
+
+def getProductUrls(categoryBS):
+  baseUrl = 'http://books.toscrape.com/catalogue/'
+  products = categoryBS.find_all('article', class_='product_pod')
+  productUrls = []
   for article in products:
     productLink = article.h3.a['href']
-    productUrls.append(f'http://books.toscrape.com/catalogue/{productLink[9:]}')
-
-bs = crawlPages(f'{website}index.html')
-categoryLinks = getCategoryLinks()
-
-for link in categoryLinks:
-  link = f"{website}{link.replace('index.html', '')}"
-  browseCategories(link, 'index.html')
+    productUrls.append(f'{baseUrl}{productLink[9:]}')
+  return productUrls
 
 
 def getTitle(bs):
@@ -72,14 +70,14 @@ def getProductDescription(bs):
   return desc
 
 
-def extractProductData(bs):
+def extractProductData(productPageBS):
   extractedData = {}
-  extractedData['title'] = getTitle(bs)
-  extractedData['image url'] = getImageUrl(bs)
-  extractedData['product description'] = getProductDescription(bs)
-  category = bs.find('ul', class_='breadcrumb').select('li:nth-of-type(3)')[0].a
+  extractedData['title'] = getTitle(productPageBS)
+  extractedData['image url'] = getImageUrl(productPageBS)
+  extractedData['product description'] = getProductDescription(productPageBS)
+  category = productPageBS.find('ul', class_='breadcrumb').select('li:nth-of-type(3)')[0].a
   extractedData['category'] = category.get_text()
-  tableRows = bs.select('table.table-striped tr')
+  tableRows = productPageBS.select('table.table-striped tr')
   extractedData['upc'] = tableRows[0].td.text
   extractedData['price excluding tax'] = tableRows[2].td.text
   extractedData['price including tax'] = tableRows[3].td.text
@@ -88,7 +86,8 @@ def extractProductData(bs):
   return extractedData
 
 
-def saveDataToFile(data_dict, header=False):
+def saveDataToFile(data_dict):
+  header = data_dict.pop('header', False)
   filePath = f"./data/{data_dict['category'].lower()}.csv"
   with open(filePath, 'a') as f:
     fieldnames = data_dict.keys()
@@ -97,17 +96,28 @@ def saveDataToFile(data_dict, header=False):
       writer.writeheader()
     writer.writerow(data_dict)
 
-filenames = []
-for link in productUrls:
-  bs = crawlPages(link)
-  data_dict = extractProductData(bs)
-  data_dict['product url'] = link
-  if data_dict['category'].lower() in filenames:
-    saveDataToFile(data_dict, header=True)
-  else:
-    saveDataToFile(data_dict, header=False)
-    filenames.append(data_dict['category'].lower())
-  # downloadProductImage(data_dict['image url'])
+
+def main():
+  website = 'http://books.toscrape.com/'
+  productUrls = []
+  homePageBS = crawlPages(f'{website}index.html')
+  categoryLinks = getCategoryLinks(homePageBS)
+  filenames = []
+  for link in categoryLinks:
+    link = f"{website}{link.replace('index.html', '')}"
+    productUrls = browseCategories(link, 'index.html', productUrls)
+    for link in productUrls:
+      productPageBS = crawlPages(link)
+      data_dict = extractProductData(productPageBS)
+      data_dict['product url'] = link
+      if data_dict['category'].lower() in filenames:
+        data_dict['header'] = True
+        saveDataToFile(data_dict)
+      else:
+        data_dict['header'] = False
+        saveDataToFile(data_dict)
+        filenames.append(data_dict['category'].lower())
+    productUrls = []
 
 
-
+main()
