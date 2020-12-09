@@ -10,4 +10,5 @@ Install the requirements
 Run the script  
 `(env_name)$ python book_scraper.py`
 
-Ouput csv files: `./data/`
+Ouput csv files: `./data/`  
+Ouput images: `./images/`
