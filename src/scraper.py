@@ -98,6 +98,6 @@ def saveDataToFile(data_dict):
     writer.writerow(data_dict)
 
 
-def downloadProductImages(imageLocation):
+def downloadProductImage(imageLocation):
   filePath = f"./images/{imageLocation.split('/')[-1]}"
   urlretrieve(imageLocation, filePath)

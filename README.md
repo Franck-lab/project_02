@@ -8,7 +8,7 @@ Install the requirements
 `(env_name)$ pip install -r requirements.txt`
 
 Run the script  
-`(env_name)$ python book_scraper.py`
+`(env_name)$ python ./src/book_scraper.py`
 
 Ouput csv files: `./data/`  
 Ouput images: `./images/`
