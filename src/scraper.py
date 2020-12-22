@@ -24,12 +24,9 @@ def getCategoryLinks(homePageBS):
 def browseCategories(baseUrl, pageLink, productUrls):
   categoryBS = crawlPages(f'{baseUrl}{pageLink}')
   productUrls.extend(getProductUrls(categoryBS))
-  try:
-    nextPage = categoryBS.find('li', class_='next').a['href']
-  except AttributeError:
-    pass
-  else:
-    productUrls = browseCategories(baseUrl, nextPage, productUrls)
+  nextPage = categoryBS.find('li', class_='next')
+  if nextPage:
+    productUrls = browseCategories(baseUrl, nextPage.a['href'], productUrls)
   return productUrls
 
 

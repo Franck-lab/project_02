@@ -21,6 +21,6 @@ def main():
         scp.saveDataToFile(data_dict)
         categories.append(data_dict['category'].lower())
       scp.downloadProductImage(data_dict['image url'])
-    productUrls = []
+    productUrls.clear()
 
 main()
