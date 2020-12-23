@@ -12,7 +12,7 @@ def main():
     for link in productUrls:
       productPageBS = scp.crawlPages(link)
       data_dict = scp.extractProductData(productPageBS)
-      data_dict['product url'] = link
+      data_dict['product_url'] = link
       if data_dict['category'].lower() in categories:
         data_dict['header'] = True
         scp.saveDataToFile(data_dict)
@@ -20,7 +20,7 @@ def main():
         data_dict['header'] = False
         scp.saveDataToFile(data_dict)
         categories.append(data_dict['category'].lower())
-      scp.downloadProductImage(data_dict['image url'])
+      scp.downloadProductImage(data_dict['image_url'])
     productUrls.clear()
 
 main()

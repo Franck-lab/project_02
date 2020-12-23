@@ -71,16 +71,16 @@ def getProductDescription(bs):
 def extractProductData(productPageBS):
   extractedData = {}
   extractedData['title'] = getTitle(productPageBS)
-  extractedData['image url'] = getImageUrl(productPageBS)
-  extractedData['product description'] = getProductDescription(productPageBS)
+  extractedData['image_url'] = getImageUrl(productPageBS)
+  extractedData['product_description'] = getProductDescription(productPageBS)
   category = productPageBS.find('ul', class_='breadcrumb').select('li:nth-of-type(3)')[0].a
   extractedData['category'] = category.get_text()
   tableRows = productPageBS.select('table.table-striped tr')
   extractedData['upc'] = tableRows[0].td.text
-  extractedData['price excluding tax'] = tableRows[2].td.text
-  extractedData['price including tax'] = tableRows[3].td.text
-  extractedData['number available'] = tableRows[5].td.text
-  extractedData['review rating'] = tableRows[6].td.text
+  extractedData['price_excluding_tax'] = tableRows[2].td.text
+  extractedData['price_including_tax'] = tableRows[3].td.text
+  extractedData['number_available'] = tableRows[5].td.text
+  extractedData['review_rating'] = tableRows[6].td.text
   return extractedData
 
 
